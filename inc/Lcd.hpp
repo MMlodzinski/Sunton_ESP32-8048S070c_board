@@ -17,7 +17,7 @@ extern SemaphoreHandle_t sem_gui_ready;
 
 class Lcd {
 private:
-  const uint32_t pixel_clock_frequency = 16000000; // Hz
+  const uint32_t pixel_clock_frequency = 16500000; // Hz
 
   const int back_light_on_level = 1;
   const int back_light_off_level = 0;
