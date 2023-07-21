@@ -69,7 +69,7 @@ Lcd::Lcd() {
        .disp_active_low = (uint32_t)NULL,
        .refresh_on_demand = (uint32_t)NULL,
        .fb_in_psram = frame_buffer_psram,
-       .double_fb = (uint32_t)NULL,
+       .double_fb = double_frame_buffer,
        .no_fb = (uint32_t)NULL,
        .bb_invalidate_cache = (uint32_t)NULL,
    } };

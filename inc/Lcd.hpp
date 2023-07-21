@@ -64,8 +64,10 @@ private:
 
 #if CONFIG_EXAMPLE_DOUBLE_FB
   const size_t frame_buffers_number = 2;
+  const bool double_frame_buffer = true;
 #else
   const size_t frame_buffers_number = 1;
+  const bool double_frame_buffer = false;
 #endif // CONFIG_EXAMPLE_DOUBLE_FB
 
   static bool onVsyncEvent(esp_lcd_panel_handle_t panel,
