@@ -69,6 +69,8 @@ std::vector<wifi_ap_record_t> Wifi::scan() {
 
   memset(ap_info, 0, sizeof(ap_info));
 
+  esp_wifi_disconnect();
+
   esp_wifi_scan_start(NULL, true);
 
   ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&max_ap_number, ap_info));
