@@ -2,10 +2,7 @@
 
 static const char *TAG = "Sunton_ESP32-8048S070c_board_wifi";
 
-Wifi::Wifi() {
-  init();
-  // connect("", "agri1234@");
-}
+Wifi::Wifi() { init(); }
 
 Wifi::~Wifi() {}
 
@@ -19,14 +16,13 @@ void Wifi::init() {
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
   ESP_ERROR_CHECK(esp_wifi_start());
 
+  esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandler, NULL);
+  esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, eventHandler, NULL);
+
   wifi_config_t wifi_configuration;
   esp_wifi_get_config(WIFI_IF_STA, &wifi_configuration);
   if (strlen((char *)wifi_configuration.sta.ssid) != 0) {
     ESP_LOGI(TAG, "Connect with remembered wifi");
-    esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandler,
-                               NULL);
-    esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, eventHandler,
-                               NULL);
     esp_wifi_connect();
   }
 }
@@ -97,30 +93,36 @@ void Wifi::eventHandler(void *event_handler_arg, esp_event_base_t event_base,
   if (event_id == WIFI_EVENT_STA_START) {
     ESP_LOGI(TAG, "WiFi connecting....");
   } else if (event_id == WIFI_EVENT_STA_CONNECTED) {
-    // s_retry_num = 0;
     connection_flag = true;
     ESP_LOGI(TAG, "WiFi connected");
   } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
+
     if (connection_flag) {
       connection_flag = false;
-      ESP_LOGI(TAG, "WiFi lost connection");
+      ESP_LOGE(TAG, "WiFi lost connection");
     } else {
-      ESP_LOGI(TAG, "WiFi connecting failed");
+      ESP_LOGE(TAG, "WiFi connecting failed");
     }
 
-    // if (s_retry_num < 5) {
-    esp_wifi_connect();
-    // s_retry_num++;
-    ESP_LOGI(TAG, "Retrying to connect...");
-    // }
+    wifi_event_sta_disconnected_t *event_info =
+        static_cast<wifi_event_sta_disconnected_t *>(event_data);
+
+    if (event_info->reason == WIFI_REASON_NO_AP_FOUND ||
+        event_info->reason ==
+            WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT) { // assuming the ssid comes
+                                                  // from scan method and is
+                                                  // always valid
+      ESP_LOGI(TAG, "Retrying to connect...");
+      esp_wifi_connect();
+    } else {
+      ESP_LOGE(TAG, "WiFi password wrong");
+    }
   } else if (event_id == IP_EVENT_STA_GOT_IP) {
     ESP_LOGI(TAG, "WiFi got IP...");
   }
 }
 
 void Wifi::connect(const char *ssid, const char *password) {
-  esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandler, NULL);
-  esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, eventHandler, NULL);
   wifi_config_t wifi_configuration = {.sta =
                                           {
                                               .ssid = "",

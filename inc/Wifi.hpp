@@ -20,11 +20,8 @@
 
 class Wifi {
 private:
-  // inline static int max_retry = 5;
   inline static bool connection_flag = false;
-
   inline static EventGroupHandle_t s_wifi_event_group;
-  // inline static int s_retry_num = 0;
 
 public:
   Wifi();
