@@ -2,7 +2,10 @@
 
 static const char *TAG = "Sunton_ESP32-8048S070c_board_wifi";
 
-Wifi::Wifi() { init(); }
+Wifi::Wifi() {
+  init();
+  // connect("", "agri1234@");
+}
 
 Wifi::~Wifi() {}
 
@@ -15,6 +18,17 @@ void Wifi::init() {
   ESP_ERROR_CHECK(esp_wifi_init(&config));
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
   ESP_ERROR_CHECK(esp_wifi_start());
+
+  wifi_config_t wifi_configuration;
+  esp_wifi_get_config(WIFI_IF_STA, &wifi_configuration);
+  if (strlen((char *)wifi_configuration.sta.ssid) != 0) {
+    ESP_LOGI(TAG, "Connect with remembered wifi");
+    esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, eventHandler,
+                               NULL);
+    esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, eventHandler,
+                               NULL);
+    esp_wifi_connect();
+  }
 }
 
 void Wifi::printAuthMode(int authmode) {
@@ -81,17 +95,24 @@ std::vector<wifi_ap_record_t> Wifi::scan() {
 void Wifi::eventHandler(void *event_handler_arg, esp_event_base_t event_base,
                         int32_t event_id, void *event_data) {
   if (event_id == WIFI_EVENT_STA_START) {
-    ESP_LOGI(TAG, "WIFI CONNECTING....");
+    ESP_LOGI(TAG, "WiFi connecting....");
   } else if (event_id == WIFI_EVENT_STA_CONNECTED) {
     // s_retry_num = 0;
-    ESP_LOGI(TAG, "WiFi CONNECTED");
+    connection_flag = true;
+    ESP_LOGI(TAG, "WiFi connected");
   } else if (event_id == WIFI_EVENT_STA_DISCONNECTED) {
-    ESP_LOGI(TAG, "WiFi lost connection");
-    if (s_retry_num < 5) {
-      esp_wifi_connect();
-      s_retry_num++;
-      ESP_LOGI(TAG, "Retrying to Connect...");
+    if (connection_flag) {
+      connection_flag = false;
+      ESP_LOGI(TAG, "WiFi lost connection");
+    } else {
+      ESP_LOGI(TAG, "WiFi connecting failed");
     }
+
+    // if (s_retry_num < 5) {
+    esp_wifi_connect();
+    // s_retry_num++;
+    ESP_LOGI(TAG, "Retrying to connect...");
+    // }
   } else if (event_id == IP_EVENT_STA_GOT_IP) {
     ESP_LOGI(TAG, "WiFi got IP...");
   }
@@ -115,3 +136,5 @@ void Wifi::connect(const char *ssid, const char *password) {
   ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s  password:%s", ssid,
            password);
 }
+
+bool Wifi::getConnectionStatus() { return connection_flag; }

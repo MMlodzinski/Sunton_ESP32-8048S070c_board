@@ -20,12 +20,11 @@
 
 class Wifi {
 private:
-  const char *ssid;
-  const char *password;
-  inline static int max_retry = 5;
+  // inline static int max_retry = 5;
+  inline static bool connection_flag = false;
 
   inline static EventGroupHandle_t s_wifi_event_group;
-  inline static int s_retry_num = 0;
+  // inline static int s_retry_num = 0;
 
 public:
   Wifi();
@@ -37,4 +36,5 @@ public:
   static void printAuthMode(int authmode);
   void init();
   std::vector<wifi_ap_record_t> scan();
+  bool getConnectionStatus();
 };
