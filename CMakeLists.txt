@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 idf_build_get_property(target IDF_TARGET)
 
-set(srcs "src/Lcd.cpp" "src/Touch.cpp")
-set(requires "esp_timer" "freertos" "driver")
+set(srcs "src/Lcd.cpp" "src/Touch.cpp" "src/Wifi.cpp")
+set(requires "esp_timer" "freertos" "driver" "esp_wifi" "nvs_flash")
 
 # if(NOT ${target} STREQUAL "linux")
 #     list(APPEND srcs
