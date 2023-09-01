@@ -117,6 +117,7 @@ void Wifi::eventHandler(void *event_handler_arg, esp_event_base_t event_base,
       ESP_LOGI(TAG, "Retrying to connect...");
       esp_wifi_connect();
     } else {
+      esp_wifi_disconnect();
       ESP_LOGE(TAG, "WiFi password wrong");
     }
   } else if (event_id == IP_EVENT_STA_GOT_IP) {
